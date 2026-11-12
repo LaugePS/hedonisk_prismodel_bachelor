@@ -70,6 +70,10 @@ Python 3.13 og pakkerne i `requirements.txt`:
 ```bash
 pip3 install -r requirements.txt
 ```
+De versioner, der er brugt i analysen, står under [Pakkeversioner](#pakkeversioner). En `requirements.txt` med låste versioner kan dannes med:
+```bash
+pip3 freeze | grep -iE "^(pandas|numpy|matplotlib|geopandas|pyfixest|statsmodels|scipy|scikit-learn)==" > requirements.txt
+```
 `pyfixest` bruges til modellerne med faste effekter. `geopandas` bruges kun til kortene i `deskriptiv.py`.
 
 ---
@@ -161,15 +165,15 @@ Numrene i opgaven svarer ikke til filnavnene. Oversigt over hovedteksten:
 ## Pakkeversioner
 | Pakke | Version |
 |---|---|
-| Python | 3.13 |
-| pandas | [udfyld] |
-| numpy | [udfyld] |
-| matplotlib | [udfyld] |
-| geopandas | [udfyld] |
-| pyfixest | [udfyld] |
-| statsmodels | [udfyld] |
-| scipy | [udfyld] |
-| scikit-learn | [udfyld] |
+| Python | 3.13.5 |
+| pandas | 3.0.3 |
+| numpy | 2.4.4 |
+| matplotlib | 3.10.9 |
+| geopandas | 1.2.0 |
+| pyfixest | 0.60.0 |
+| statsmodels | 0.14.6 |
+| scipy | 1.17.1 |
+| scikit-learn | 1.9.1 |
 
 Versionerne findes med:
 ```bash
