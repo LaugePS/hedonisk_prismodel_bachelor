@@ -444,8 +444,12 @@ yy = np.arange(len(koler))
 farver = [BLAA] * 5 + [ORANGE]
 ax.barh(yy, vaerdier, height=0.55, color=farver)
 for y, val in zip(yy, vaerdier):
-    ax.text(val + 0.15, y, dk(val, 1), va="center", fontsize=7.5, color=INK)
-ax.axvline(vaerdier[-1], color=ORANGE, lw=0.8, ls="--")
+    # Tallet står til højre for den stiplede vurderingslinje, når søjlen slutter tæt på eller
+    # før linjen, så linjen ikke går gennem tallet (rettet 19/11)
+    xt = max(val, vaerdier[-1]) + 0.15
+    ax.text(xt, y, dk(val, 1), va="center", fontsize=7.5, color=INK, zorder=5,
+            bbox=dict(fc="white", ec="none", pad=0.8))
+ax.axvline(vaerdier[-1], color=ORANGE, lw=0.8, ls="--", zorder=1)
 ax.set_yticks(yy, etiketter, fontsize=7.5)
 ax.invert_yaxis()
 ax.grid(axis="y", visible=False)
