@@ -238,9 +238,14 @@ def tegn_kort(kolonne, n_kolonne, cmap, norm, titel, label, fmt, navn):
     cb.set_label(label, color=INK2)
     cb.ax.yaxis.set_major_formatter(fmt)
     cb.outline.set_visible(False)
-    ax.legend(handles=[Patch(facecolor="#f0efec", edgecolor=MUTED, hatch="////",
-                             label=f"Under {MIN_HANDLER_KOMMUNE} handler")],
-              loc="upper right", fontsize=8)
+    # Forklaringen vises kun, hvis der er synligt skraverede kommuner, dvs. kommuner med
+    # mellem 1 og 29 handler. Christiansø har ingen handler og er for lille til at ses (rettet 19/11)
+    faa = ~ok & (kort[n_kolonne].fillna(0) > 0)
+    print(f"  {navn}: kommuner med 1-{MIN_HANDLER_KOMMUNE - 1} handler: {int(faa.sum())}")
+    if faa.any():
+        ax.legend(handles=[Patch(facecolor="#f0efec", edgecolor=MUTED, hatch="////",
+                                 label=f"Under {MIN_HANDLER_KOMMUNE} handler")],
+                  loc="upper right", fontsize=8)
     # Titel fjernet (vejledermøde 28/10) – står i figurteksten i Word:
     # ax.set_title(titel, loc="left")
     ax.set_axis_off()
@@ -291,7 +296,8 @@ cb.ax.yaxis.set_major_formatter(FMT_TAL)
 ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: dk(x, 1)))
 ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: dk(x, 0)))
 cb.outline.set_visible(False)
-ax.legend(loc="lower right", fontsize=8)
+ax.legend(loc="lower right", fontsize=8, frameon=True, facecolor="white", edgecolor="none",
+          framealpha=0.9)   # hvid baggrund, så teksten ikke ligger direkte på punkterne
 gem(fig, "fig_3_pris_areal.png")
 print(f"  Simpel elasticitet af pris mht. boligareal (ingen kontroller): {haeldning:.3f}")
 
@@ -306,11 +312,12 @@ def boxplot(grupper, data, titel, xlabel, navn):
                     boxprops=dict(facecolor=BLAA_LYS, edgecolor=BLAA, lw=1),
                     whiskerprops=dict(color=BLAA, lw=1), capprops=dict(color=BLAA, lw=1))
     lange = max(len(str(g)) for g in grupper) > 5
-    ax.set_xticks(range(1, len(grupper) + 1), grupper, rotation=30 if lange else 0,
+    # Antal handler står i akseteksten under hver kategori, så det ikke ligger oven på
+    # x-aksen og knurhårene (rettet 19/11)
+    n_tekst = [f"n={dk(len(v) / 1000, 0)}k" for v in vaerdier]
+    etiketter = [f"{g} ({n})" if lange else f"{g}\n{n}" for g, n in zip(grupper, n_tekst)]
+    ax.set_xticks(range(1, len(grupper) + 1), etiketter, rotation=30 if lange else 0,
                   ha="right" if lange else "center")
-    for i, v in enumerate(vaerdier, start=1):
-        ax.text(i, ax.get_ylim()[0], f"n={dk(len(v) / 1000, 0)}k", ha="center", va="bottom",
-                fontsize=7, color=MUTED)
     ax.set_ylabel("Kr. pr. m² boligareal")
     ax.set_xlabel(xlabel)
     ax.yaxis.set_major_formatter(FMT_TAL)
