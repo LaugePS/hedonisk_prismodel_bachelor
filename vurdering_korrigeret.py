@@ -181,7 +181,7 @@ faktor_m5 = (kal["pris"] / kal["p_model"]).groupby(kal["kvartal"]).median()
 test["M5"] = test["p_model"] * test["kvartal"].map(faktor_m5)
 
 MODELLER = {"V0": "V0 Rå vurdering", "V1": "V1 Vurdering, niveau pr. kvartal",
-            "V2": "V2 + energimærke (OLS)", "V2m": "V2m + energimærke (median)", "V3": "V3 + alle boligkarakteristika og postnr",
+            "V2": "V2 + energimærke (OLS)", "V2m": "V2m + energimærke (median)", "V3": "V3 + boligkarakteristika og postnr.",
             "K1": "K1 Kombination vurdering + trin 5", "K2": "K2 Kombination + boligkarakteristika",
             "M5": "Trin 5-model alene (tidstro)"}
 foer = len(test)
@@ -298,7 +298,7 @@ for a, b in [("V0_em", "V0"), ("V0_emm", "V0"), ("V1_em", "V1"), ("V1_emm", "V1"
 # =============================================================================
 overskrift("Figur")
 fig, (a1, a2) = plt.subplots(1, 2, figsize=(16 / 2.54, 8 / 2.54),
-                             gridspec_kw={"width_ratios": [1.25, 1]})
+                             gridspec_kw={"width_ratios": [1.2, 1.1]})
 koder = list(MODELLER)
 farver = {"V0": MUTED, "V1": ORANGE, "V2": ORANGE, "V2m": ORANGE, "V3": ORANGE, "K1": GROEN, "K2": GROEN, "M5": BLAA}
 res = bs_alle["Alle testhandler"]
@@ -313,6 +313,7 @@ a1.invert_yaxis()
 a1.grid(axis="y", visible=False)
 a1.axvline(np.median(abs_pct(test["V1"], test["pris"])), color=ORANGE, lw=0.7, ls="--")
 a1.xaxis.set_major_formatter(FuncFormatter(lambda x, _: dk(x, 1)))
+a1.set_xlim(right=a1.get_xlim()[1] + 0.2)   # plads til tallet ved V0 inden for akserne (rettet 19/11)
 a1.set_xlabel("MdAPE (%), 95 %-bootstrap-KI")
 a1.set_title("a) Præcision på testdata", loc="left", fontsize=8.5)
 
@@ -322,7 +323,8 @@ for j, (k, farve, navn) in enumerate([("V1", ORANGE, "Vurdering (V1)"),
                                       ("M5", BLAA, "Model alene (trin 5)")]):
     a2.bar(x + (j - 1) * 0.27, t24[f"Median %-fejl {k}"], width=0.26, color=farve, label=navn)
 a2.axhline(0, color=MUTED, lw=0.8)
-a2.set_xticks(x, t24.index, fontsize=7)
+a2.set_xticks(x, t24.index, fontsize=6.5)
+a2.set_xlim(-0.6, len(t24) - 0.4)
 a2.grid(axis="x", visible=False)
 a2.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{dk(v)} %"))
 a2.set_title("b) Median %-fejl pr. energimærke\n(> 0: forudsagt over salgsprisen)",
