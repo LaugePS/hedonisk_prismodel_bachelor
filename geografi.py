@@ -416,16 +416,17 @@ fig, ax = plt.subplots(figsize=(16 / 2.54, 5.5 / 2.54))
 interv = [n for n in KYST_NAVNE if n != KYST_REF]
 y = np.arange(len(interv))
 for i, (navn, etiket, farve, mk, fyld) in enumerate([
-        ("G1", "Uden postnummer-FE (på tværs af landet)", MUTED, "s", "full"),
-        ("G2", "Med postnummer-FE (inden for samme postnummer)", BLAA, "o", "full")]):
+        ("G1", "Uden postnummer-dummies (G1, på tværs af landet)", MUTED, "s", "full"),
+        ("G2", "Med postnummer-dummies (G2, inden for samme postnummer)", BLAA, "o", "full")]):
     rk = t27.loc[navn].reindex([f"kystinterval::{n}" for n in interv])
     eff = rk["pct_effekt"].to_numpy()
     ax.errorbar(eff, y + (i - 0.5) * 0.28,
                 xerr=[eff - rk["pct_KI_nedre"].to_numpy(), rk["pct_KI_oevre"].to_numpy() - eff],
                 fmt=mk, color=farve, ecolor=farve, markersize=4.5, elinewidth=1.2, capsize=2,
                 fillstyle=fyld, label=etiket)
-    for xi, yi in zip(eff, y + (i - 0.5) * 0.28):
-        ax.text(xi, yi - 0.17, f"{dk(xi, 1)} %", ha="center", va="bottom", fontsize=7, color=farve)
+    # Værdien står til højre for fejlstregen, så den ikke rammer den anden models punkt (rettet 19/11)
+    for xi, hi_i, yi in zip(eff, rk["pct_KI_oevre"].to_numpy(), y + (i - 0.5) * 0.28):
+        ax.text(hi_i + 1.2, yi, f"{dk(xi, 1)} %", ha="left", va="center", fontsize=7, color=farve)
 ax.axvline(0, color=MUTED, lw=1)
 ax.set_yticks(y, interv)
 ax.invert_yaxis()
@@ -433,7 +434,9 @@ ax.grid(axis="y", visible=False)
 ax.set_xlim(left=min(0, ax.get_xlim()[0]))
 ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{dk(x)} %"))
 ax.set_xlabel("Forskel i salgspris i forhold til huse over 5 km fra kysten (%), 95 %-KI")
-ax.legend(loc="lower right", frameon=False, fontsize=7)
+ax.set_xlim(right=ax.get_xlim()[1] + 8)   # plads til tallet ved 0-250 m inden for akserne
+# Forklaringen står under figuren, så den ikke dækker 1-5 km-rækken (rettet 19/11)
+ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.3), ncol=2, frameon=False, fontsize=7)
 fig.savefig(UD / "fig_18_kystpraemie.png")
 plt.close(fig)
 print("  gemt: fig_18_kystpraemie.png")
