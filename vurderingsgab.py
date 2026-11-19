@@ -41,7 +41,7 @@ import pandas as pd
 import pyfixest as pf
 import statsmodels.formula.api as smf
 from matplotlib.lines import Line2D
-from matplotlib.ticker import FuncFormatter, MaxNLocator
+from matplotlib.ticker import FuncFormatter, MaxNLocator, MultipleLocator
 
 from faelles import BLAA, INK, MUTED, REF, REGION_RAEKKEFOELGE, dk, forbered_data, overskrift
 
@@ -262,10 +262,13 @@ fig, (a1, a2) = plt.subplots(1, 2, figsize=(16 / 2.54, 7.5 / 2.54),
 bins = np.linspace(0.4, 2.0, 65)
 for aar, farve in zip(AAR, [BLAA, ORANGE]):
     x = d.loc[d["salgsaar"] == aar, "vurderingsgab"]
-    a1.hist(x, bins=bins, density=True, histtype="step", lw=1.4, color=farve)
+    # y = andel af årets handler i hvert interval (bredde 0,025), så aksen kan aflæses (rettet 19/11)
+    a1.hist(x, bins=bins, weights=np.full(len(x), 100 / len(x)), histtype="step", lw=1.4,
+            color=farve)
 a1.axvline(1, color=INK, lw=0.8, ls="--")
 a1.set_xlabel("Salgspris / offentlig vurdering")
-a1.set_yticks([])
+a1.set_ylabel("Andel af årets handler (%)")
+a1.yaxis.set_major_formatter(FuncFormatter(lambda v, _: dk(v, 1)))
 a1.set_ylim(0, a1.get_ylim()[1] * 1.3)   # plads til forklaringen over fordelingen
 handles = [Line2D([], [], color=f, lw=1.4) for f in [BLAA, ORANGE]]
 a1.legend(handles, [f"Salg i {aar} (median "
@@ -273,6 +276,7 @@ a1.legend(handles, [f"Salg i {aar} (median "
                     for aar in AAR], frameon=False, fontsize=7, loc="upper right")
 a1.set_title("a) Fordeling af salgspris / vurdering\n(vist mellem 0,4 og 2,0)", loc="left",
              fontsize=8.5)
+a1.xaxis.set_major_locator(MultipleLocator(0.5))   # 0,5 / 1,0 / 1,5 / 2,0 – ingen afrundede ticks
 a1.xaxis.set_major_formatter(FuncFormatter(lambda x, _: dk(x, 1)))
 
 orden = ["A", "B", "C", "D", "E", "F", "G", "Intet"]
@@ -309,6 +313,7 @@ ax.invert_yaxis()
 ax.grid(axis="y", visible=False)
 ax.xaxis.set_major_locator(MaxNLocator(steps=[1, 2, 5, 10]))
 ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{dk(x)} %"))
+ax.set_xlabel("Prisforskel i forhold til referencekategorien (%), 95 %-KI")
 ax.legend(frameon=False, fontsize=7.5, loc="lower right")
 # Titel fjernet (vejledermøde 28/10) – står i figurteksten i Word:
 # ax.set_title("Markedets og vurderingens prissætning af boligens egenskaber\n"
